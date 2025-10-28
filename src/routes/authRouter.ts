@@ -63,4 +63,7 @@ router.post("/reset-password/:token",
     AuthController.resetPasswordWithToken
 )
 
+//*Obtendra la informacion del usuario por medio del token
+router.get("/user", AuthController.User)
+
 export default router;

@@ -1,9 +1,11 @@
 import {Request, Response} from "express"
+import jwt from "jsonwebtoken";
 import User from "../models/User"
 import { AuthEmail } from "../emails/AuthEmail";
 import { checkPassword, hashPassword } from "../utils/auth";
 import { generateToken } from "../utils/token";
 import { generateJWT } from "../utils/jwt";
+import { decode } from "punycode";
 
 
 export class AuthController {
@@ -142,14 +144,54 @@ export class AuthController {
         }
 
         //*Asignamos el nuevo password
-
         user.password = await hashPassword(password)
-        //*Puede ser tambien con null
+        //*Puede ser tambien con null y se hace para que no lo vuelva utilizar
         user.token = " "
 
         await user.save();
 
         
         res.json("El password se modifico correctamente")
+    }
+
+    //*Traera la informacion del usuario validado por el token
+    static User = async(req: Request, res: Response) =>{
+        //*Accedemos al header de la autorizacion
+        const bearer = req.headers.authorization
+
+        if(!bearer){
+            const error = new Error("No estas autorizado")
+            return res.status(401).json({error:error.message})
+        }
+
+        //* esto sirve mas que nada para separar el bearer del token ya que solo necesitamos el token, split es un metodo que separa un string
+        const [texto, token] = bearer.split(" ")
+
+        //*esta parte verifica si el token que viene enviado de axios esta vacio pues no tiene autorizacion para ver la info de ese usuario
+        if(!token){
+            const error = new Error("El token no fue valido")
+            return res.status(401).json({error:error.message})
+        }
+
+        //*Si pasa las validaciones buscamos el token alla sido validado por nosotros 
+        try {
+            //*Usa verify para decodificar el token y la palabra secreta para comporobar si es valida, si es valido devuelve un payload con datos del usuario
+            const decoded = jwt.verify(token, process.env.JWT_SECRET)
+            //*Despues de decodificar el token el if asegura que el contenido sea un objeto y que tenga la propiedad id 
+            if(typeof decoded === "object" && decoded.id){
+                //*Busca el usuario por el id que viene decodificado del token
+                const user = await User.findByPk(decoded.id, {
+                    //*Aqui seleccionamos los atributos del usuario que necesitamos enviar a el nageador
+                    attributes: ["id", "name", "email"]
+                })
+                //*lo envia
+                res.json(user)
+            }
+            
+        } catch (error) {
+            res.status(500).json({error:"Token no valido"})
+        }
+
+        
     }
 }
