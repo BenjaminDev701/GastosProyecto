@@ -10,8 +10,12 @@ export class BudgetController {
       //*En el objeto puedes aplicar algunos filtros con sql
       const budget = await Budget.findAll({
         order: [["createdAt", "DESC"]],
+        where: {
+          userId: req.user.id
+        }
       });
-      //TODO : Filtrar por usuario autenticado
+      //*Filtramos los budgets de acuerdo al id del usuario autenticado
+      
 
       res.json(budget);
     } catch (error) {

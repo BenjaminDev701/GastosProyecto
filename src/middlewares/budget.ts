@@ -73,3 +73,13 @@ export const validateBudgetInput  = async(req : Request, res : Response, next:Ne
     next()
     
 }
+
+//*Este middleware valida que las acciones del crud lo este realizando un usuario autenticado y que le pertenezca el presupuesto
+export function hashAccess(req: Request, res: Response, next: NextFunction){
+    //*est se refiere que si el id del del dueño del presupuesto es diferente al id del usuario autenticado salga un error
+    if(req.budget.userId !== req.user.id){
+        const error = new Error("Accion no valida")
+        return res.status(401).json({error:error.message})
+    }
+    next();
+}

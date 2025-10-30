@@ -1,12 +1,14 @@
-import { Router } from "express";
+import { NextFunction, Router } from "express";
 import { body, param } from "express-validator";
 import { BudgetController } from "../Controllers/BudgetController";
 import { handleInputErrors } from "../middlewares/validation";
-import { validateBudgetExists, validateBudgetId, validateBudgetInput } from "../middlewares/budget";
+import { hashAccess, validateBudgetExists, validateBudgetId, validateBudgetInput } from "../middlewares/budget";
 import { ExpenseController } from "../Controllers/ExpenseController";
 import { valdiateExpenseId, valdiateExpenseInput, validateExpenseExist } from "../middlewares/expense";
 import { authenticate } from "../middlewares/auth";
-
+import Budget from "../models/Budget";
+import User from "../models/User";
+import type { Request, Response } from "express";
 
 const router = Router();
 
@@ -16,6 +18,7 @@ router.use(authenticate)
 //*Esto hace que todos los que tengan como parametor budgetId ejecuten esas funciones
 router.param("budgetId", validateBudgetId);
 router.param("budgetId", validateBudgetExists);
+router.param("budgetId", hashAccess)
 
 //*Esto hace que todos los que tengan como parametor expenseId ejecuten esas funciones
 router.param("expenseId",valdiateExpenseId )
