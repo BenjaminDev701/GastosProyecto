@@ -5,9 +5,13 @@ import { handleInputErrors } from "../middlewares/validation";
 import { validateBudgetExists, validateBudgetId, validateBudgetInput } from "../middlewares/budget";
 import { ExpenseController } from "../Controllers/ExpenseController";
 import { valdiateExpenseId, valdiateExpenseInput, validateExpenseExist } from "../middlewares/expense";
+import { authenticate } from "../middlewares/auth";
 
 
 const router = Router();
+
+//*Con esto nosotros hacemos que todas las rutas que estan aqui sean progtegidos y necesiten la autenticacion
+router.use(authenticate)
 
 //*Esto hace que todos los que tengan como parametor budgetId ejecuten esas funciones
 router.param("budgetId", validateBudgetId);

@@ -25,7 +25,8 @@ export class BudgetController {
     try {
       //*Creamos una instancia(objeto) del modelo  de acuerdo a las caracteristicas del modelo y tambien nosotros mandamos en req.body para que los datos enviados los agrege en la bd del modelo
       const budget = new Budget(req.body);
-
+      //*en nuestro budged.id le asginamos el id del usuario autenticado
+      budget.userId = req.user.id
       await budget.save();
       res.status(201).json("Presupuesto creado");
     } catch (error) {
